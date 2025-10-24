@@ -4,7 +4,6 @@
 
 **The smarter way for SCIS students to plan and bid**
 
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18-61dafb)](https://reactjs.org/)
 
@@ -74,6 +73,4 @@ node scripts/parseAllExcel.js
 
 This updates `src/data/scis-courses.ts` with the latest course information.
 
-## 📄 License
-
-Made with ❤️ for SMU students
+## Made with ❤️ for SMU students
