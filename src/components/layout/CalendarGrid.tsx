@@ -106,7 +106,7 @@ export function CalendarGrid() {
     }));
 
     // Group overlapping events
-    const groups: typeof eventsWithPositions[][] = [];
+    const groups: typeof eventsWithPositions[] = [];
     const processed = new Set<number>();
 
     eventsWithPositions.forEach((eventData, idx) => {
