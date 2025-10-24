@@ -1,55 +1,80 @@
-# Plan-Like-A-BOSS
+<div align="center">
 
-A focused, production-ready course planner tailored for SMU students. Build and visualize weekly schedules, detect time conflicts, share or export calendars, and import preloaded course data.
+# 📚 Plan-Like-A-BOSS
 
-Highlights
+**Smart course scheduling for SMU students**
 
-- Preloaded SCIS course data with section timings
-- Visual weekly calendar with conflict detection
-- Multiple schedule drafts, shareable links, PNG/.ics export
-- Command palette (Cmd/Ctrl+K) and theme toggle
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-61dafb)](https://reactjs.org/)
 
-Quick start
+Build conflict-free timetables with an intuitive weekly calendar view. Create multiple schedule drafts, detect conflicts instantly, and export your perfect semester plan.
 
-1. Install dependencies
+[Demo](#) • [Features](#features) • [Quick Start](#quick-start)
 
-   npm install
+</div>
 
-2. Start dev server
+---
 
-   npm run dev
+## ✨ Features
 
-3. Build for production
+- 🗓️ **Visual Weekly Calendar** - See your entire week at a glance with side-by-side conflict detection
+- ⚠️ **Smart Conflict Detection** - Overlapping courses are displayed side-by-side for easy comparison and removal
+- 📝 **Multiple Schedules** - Create and compare different timetable drafts
+- 🎨 **Dark/Light Theme** - Choose your preferred viewing mode
+- ⌨️ **Command Palette** - Quick actions with `Cmd/Ctrl+K`
+- 📤 **Export Options** - Share via URL or export as PNG/ICS
+- 🎓 **Preloaded SCIS Data** - SMU course sections ready to use
 
-   npm run build
+## 🚀 Quick Start
 
-Tech stack
+```bash
+# Install dependencies
+npm install
 
-- React + Vite
-- TypeScript
-- Tailwind CSS
-- Zustand (state), Framer Motion (animations), date-fns, xlsx
+# Start development server
+npm run dev
 
-Project layout (key folders)
+# Build for production
+npm run build
+```
 
-- `src/` — app source (components, store, utils, data)
-- `scripts/` — Excel parsers (generate `src/data/scis-courses.ts`)
-- `public/`, `index.html`, `package.json`, `vite.config.ts`
+Visit `http://localhost:5173` to start planning!
 
-Updating course data
+## 🛠️ Tech Stack
 
-Run:
+| Category | Technology |
+|----------|------------|
+| **Framework** | React 18 + Vite |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS |
+| **State** | Zustand |
+| **Animation** | Framer Motion |
+| **Utilities** | date-fns, xlsx |
 
-   node scripts/parseAllExcel.js
+## 📁 Project Structure
 
-This regenerates `src/data/scis-courses.ts` from the included Excel files.
+```
+Plan-Like-A-Boss/
+├── src/
+│   ├── components/     # React components
+│   ├── store/          # Zustand state management
+│   ├── utils/          # Helper functions
+│   └── data/           # Course data
+├── scripts/            # Excel parsers
+└── public/             # Static assets
+```
 
-Contributing & support
+## 🔄 Updating Course Data
 
-- Open an issue or PR on GitHub. Small, focused contributions welcome.
+To regenerate course data from Excel files:
 
-License
+```bash
+node scripts/parseAllExcel.js
+```
 
-- MIT
+This updates `src/data/scis-courses.ts` with the latest course information.
 
-Made for SMU — plan your semester like a BOSS.
+## 📄 License
+
+MIT © 2024 - Made with ❤️ for SMU students
