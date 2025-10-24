@@ -6,7 +6,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, BookOpen, Users, X, Filter } from 'lucide-react';
+import { Search, Plus, BookOpen, Users, X, Filter, DollarSign, Info } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -19,6 +19,8 @@ import {
   getCoursesByPrefix,
   COURSE_STATS
 } from '@/data/scis-courses';
+import { getCourseData } from '@/data/boss-data';
+import { CourseDetailModal } from '@/components/CourseDetailModal';
 
 interface CourseBrowserProps {
   isOpen: boolean;
@@ -29,6 +31,7 @@ export function CourseBrowser({ isOpen, onClose }: CourseBrowserProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<PreloadedCourse | null>(null);
   const [prefixFilter, setPrefixFilter] = useState<string>('all');
+  const [detailCourse, setDetailCourse] = useState<{ code: string; name: string } | null>(null);
 
   const addCourse = useStore((state) => state.addCourse);
   const addSection = useStore((state) => state.addSection);
@@ -190,6 +193,33 @@ export function CourseBrowser({ isOpen, onClose }: CourseBrowserProps) {
                           <Users className="w-3 h-3" />
                           {course.sections.length} section{course.sections.length !== 1 ? 's' : ''}
                         </Badge>
+                        {(() => {
+                          const bossData = getCourseData(course.courseCode);
+                          if (bossData) {
+                            const allRecords = bossData.sections.flatMap(s => s.biddingHistory);
+                            const medianBids = allRecords.map(r => r.medianBid).filter(b => b > 0);
+                            if (medianBids.length > 0) {
+                              const avgBid = Math.round(medianBids.reduce((a, b) => a + b, 0) / medianBids.length);
+                              return (
+                                <Badge variant="success" className="flex items-center gap-1">
+                                  <DollarSign className="w-3 h-3" />
+                                  {avgBid}
+                                </Badge>
+                              );
+                            }
+                          }
+                          return null;
+                        })()}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDetailCourse({ code: course.courseCode, name: course.courseName });
+                          }}
+                          className="flex items-center gap-1 px-2 py-0.5 text-xs bg-accent-blue/20 text-accent-blue rounded hover:bg-accent-blue/30 transition-colors"
+                        >
+                          <Info className="w-3 h-3" />
+                          <span>View Bids</span>
+                        </button>
                       </div>
                       <p className="text-sm text-dark-text-secondary dark:text-dark-text-secondary line-clamp-1">
                         {course.courseName}
@@ -301,6 +331,16 @@ export function CourseBrowser({ isOpen, onClose }: CourseBrowserProps) {
             </Button>
           </motion.div>
         </div>
+      )}
+
+      {/* BOSS Data Detail Modal */}
+      {detailCourse && (
+        <CourseDetailModal
+          isOpen={true}
+          onClose={() => setDetailCourse(null)}
+          courseCode={detailCourse.code}
+          courseName={detailCourse.name}
+        />
       )}
     </Modal>
   );
