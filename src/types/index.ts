@@ -19,6 +19,7 @@ export interface Section {
   instructor: string;
   venue?: string; // Optional venue/location
   notes?: string; // Optional notes (e.g., bidding price, preferences)
+  bidAmount?: number; // BOSS bidding amount (e-dollars)
   isSelected: boolean; // Whether this section is currently selected for the schedule
   hasConflict: boolean; // Whether this section has a time conflict with another
 }
