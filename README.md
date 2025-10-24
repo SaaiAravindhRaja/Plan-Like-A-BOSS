@@ -2,7 +2,7 @@
 
 # 📚 Plan-Like-A-BOSS
 
-**Smart course scheduling for SMU students**
+**The smarter way for SCIS students to plan and bid**
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
@@ -24,7 +24,6 @@ Build conflict-free timetables with an intuitive weekly calendar view. Create mu
 - 🎨 **Dark/Light Theme** - Choose your preferred viewing mode
 - ⌨️ **Command Palette** - Quick actions with `Cmd/Ctrl+K`
 - 📤 **Export Options** - Share via URL or export as PNG/ICS
-- 🎓 **Preloaded SCIS Data** - SMU course sections ready to use
 
 ## 🚀 Quick Start
 
@@ -77,4 +76,4 @@ This updates `src/data/scis-courses.ts` with the latest course information.
 
 ## 📄 License
 
-MIT © 2024 - Made with ❤️ for SMU students
+Made with ❤️ for SMU students
