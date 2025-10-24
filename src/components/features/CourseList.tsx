@@ -11,6 +11,8 @@ import {
   Trash2,
   AlertCircle,
   CheckCircle,
+  Info,
+  DollarSign,
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { Course, Section } from '@/types';
@@ -21,6 +23,7 @@ import { formatTimeDisplay } from '@/utils/timeUtils';
 import { AddCourseModal } from './AddCourseModal';
 import { AddSectionModal } from './AddSectionModal';
 import { CourseBrowser } from './CourseBrowser';
+import { CourseDetailModal } from '@/components/CourseDetailModal';
 
 export function CourseList() {
   const getCurrentSchedule = useStore((state) => state.getCurrentSchedule);
@@ -32,6 +35,7 @@ export function CourseList() {
   const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
   const [isCourseBrowserOpen, setIsCourseBrowserOpen] = useState(false);
   const [addSectionCourseId, setAddSectionCourseId] = useState<string | null>(null);
+  const [detailCourse, setDetailCourse] = useState<{ code: string; name: string } | null>(null);
 
   const schedule = getCurrentSchedule();
 
@@ -127,6 +131,7 @@ export function CourseList() {
                   toggleSectionSelection(course.id, sectionId)
                 }
                 onDeleteSection={(sectionId) => deleteSection(course.id, sectionId)}
+                onViewDetails={() => setDetailCourse({ code: course.courseCode, name: course.courseName })}
               />
             ))}
           </AnimatePresence>
@@ -151,6 +156,15 @@ export function CourseList() {
           onClose={() => setAddSectionCourseId(null)}
         />
       )}
+
+      {detailCourse && (
+        <CourseDetailModal
+          isOpen={true}
+          onClose={() => setDetailCourse(null)}
+          courseCode={detailCourse.code}
+          courseName={detailCourse.name}
+        />
+      )}
     </div>
   );
 }
@@ -163,6 +177,7 @@ interface CourseCardProps {
   onAddSection: () => void;
   onToggleSection: (sectionId: string) => void;
   onDeleteSection: (sectionId: string) => void;
+  onViewDetails: () => void;
 }
 
 function CourseCard({
@@ -173,6 +188,7 @@ function CourseCard({
   onAddSection,
   onToggleSection,
   onDeleteSection,
+  onViewDetails,
 }: CourseCardProps) {
   const selectedSections = course.sections.filter((s) => s.isSelected);
   const conflictingSections = course.sections.filter((s) => s.hasConflict);
@@ -206,7 +222,7 @@ function CourseCard({
               <p className="text-sm text-dark-text-secondary truncate mb-2">
                 {course.courseName}
               </p>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <Badge variant="info">
                   {selectedSections.length} selected
                 </Badge>
@@ -216,6 +232,16 @@ function CourseCard({
                     {conflictingSections.length} conflict{conflictingSections.length !== 1 ? 's' : ''}
                   </Badge>
                 )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewDetails();
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 text-xs bg-accent-blue/20 text-accent-blue rounded hover:bg-accent-blue/30 transition-colors"
+                >
+                  <Info className="w-3 h-3" />
+                  <span>BOSS Data</span>
+                </button>
               </div>
             </div>
           </button>
@@ -249,6 +275,7 @@ function CourseCard({
                   <SectionItem
                     key={section.id}
                     section={section}
+                    courseId={course.id}
                     courseColor={course.color}
                     onToggle={() => onToggleSection(section.id)}
                     onDelete={() => onDeleteSection(section.id)}
@@ -275,12 +302,20 @@ function CourseCard({
 
 interface SectionItemProps {
   section: Section;
+  courseId: string;
   courseColor: string;
   onToggle: () => void;
   onDelete: () => void;
 }
 
-function SectionItem({ section, courseColor, onToggle, onDelete }: SectionItemProps) {
+function SectionItem({ section, courseId, courseColor, onToggle, onDelete }: SectionItemProps) {
+  const updateSection = useStore((state) => state.updateSection);
+
+  const handleBidChange = (value: string) => {
+    const bidAmount = value === '' ? undefined : parseInt(value, 10);
+    if (value !== '' && (isNaN(bidAmount!) || bidAmount! < 0)) return;
+    updateSection(courseId, section.id, { bidAmount });
+  };
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
@@ -331,6 +366,27 @@ function SectionItem({ section, courseColor, onToggle, onDelete }: SectionItemPr
           <Trash2 className="w-3 h-3" />
         </button>
       </div>
+
+      {/* Bid Amount Input */}
+      {section.isSelected && (
+        <div className="mt-2 pt-2 border-t border-dark-border/50">
+          <label className="flex items-center gap-2 text-xs text-dark-text-secondary mb-1">
+            <DollarSign className="w-3 h-3" />
+            <span>Bid Amount (e-dollars)</span>
+          </label>
+          <input
+            type="number"
+            min="0"
+            value={section.bidAmount ?? ''}
+            onChange={(e) => handleBidChange(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            placeholder="Enter your bid"
+            className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-white text-sm
+                     focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue
+                     placeholder:text-dark-text-secondary"
+          />
+        </div>
+      )}
     </motion.div>
   );
 }
