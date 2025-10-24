@@ -127,6 +127,7 @@ export interface AppState {
  */
 export interface CalendarEvent {
   id: string;
+  courseId: string;
   courseCode: string;
   courseName: string;
   sectionId: string;

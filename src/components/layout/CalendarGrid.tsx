@@ -31,6 +31,7 @@ export function CalendarGrid() {
         .forEach((section) => {
           events.push({
             id: section.id,
+            courseId: course.id,
             courseCode: course.courseCode,
             courseName: course.courseName,
             sectionId: section.sectionId,
@@ -59,6 +60,86 @@ export function CalendarGrid() {
 
   events.forEach((event) => {
     eventsByDay[event.day].push(event);
+  });
+
+  // Helper function to detect time overlap between two events
+  const eventsOverlap = (event1: CalendarEvent, event2: CalendarEvent) => {
+    const [start1Hour, start1Min] = event1.startTime.split(':').map(Number);
+    const [end1Hour, end1Min] = event1.endTime.split(':').map(Number);
+    const [start2Hour, start2Min] = event2.startTime.split(':').map(Number);
+    const [end2Hour, end2Min] = event2.endTime.split(':').map(Number);
+
+    const start1 = start1Hour * 60 + start1Min;
+    const end1 = end1Hour * 60 + end1Min;
+    const start2 = start2Hour * 60 + start2Min;
+    const end2 = end2Hour * 60 + end2Min;
+
+    return start1 < end2 && end1 > start2;
+  };
+
+  // Calculate layout for overlapping events (side-by-side positioning)
+  interface EventLayout {
+    event: CalendarEvent;
+    position: { top: number; height: number };
+    column: number;
+    totalColumns: number;
+  }
+
+  const eventLayoutsByDay: Record<DayOfWeek, EventLayout[]> = {
+    Monday: [],
+    Tuesday: [],
+    Wednesday: [],
+    Thursday: [],
+    Friday: [],
+    Saturday: [],
+    Sunday: [],
+  };
+
+  // For each day, calculate layout
+  DAYS.forEach((day) => {
+    const dayEvents = eventsByDay[day];
+
+    // Calculate positions first
+    const eventsWithPositions = dayEvents.map((event) => ({
+      event,
+      position: calculateEventPosition(event.startTime, event.endTime, START_HOUR, END_HOUR),
+    }));
+
+    // Group overlapping events
+    const groups: typeof eventsWithPositions[][] = [];
+    const processed = new Set<number>();
+
+    eventsWithPositions.forEach((eventData, idx) => {
+      if (processed.has(idx)) return;
+
+      const group = [eventData];
+      processed.add(idx);
+
+      // Find all events that overlap with any event in the current group
+      for (let i = 0; i < group.length; i++) {
+        eventsWithPositions.forEach((otherEventData, otherIdx) => {
+          if (processed.has(otherIdx)) return;
+          if (eventsOverlap(group[i].event, otherEventData.event)) {
+            group.push(otherEventData);
+            processed.add(otherIdx);
+          }
+        });
+      }
+
+      groups.push(group);
+    });
+
+    // Assign columns to events in each group
+    groups.forEach((group) => {
+      group.forEach((eventData, idx) => {
+        eventLayoutsByDay[day].push({
+          event: eventData.event,
+          position: eventData.position,
+          column: idx,
+          totalColumns: group.length,
+        });
+      });
+    });
   });
 
   // Calculate statistics
@@ -175,23 +256,16 @@ export function CalendarGrid() {
 
                 {/* Events overlay */}
                 <div className="absolute inset-0 pointer-events-none">
-                  {eventsByDay[day].map((event) => {
-                    const position = calculateEventPosition(
-                      event.startTime,
-                      event.endTime,
-                      START_HOUR,
-                      END_HOUR
-                    );
-
-                    return (
-                      <CalendarEventBlock
-                        key={event.id}
-                        event={event}
-                        top={position.top}
-                        height={position.height}
-                      />
-                    );
-                  })}
+                  {eventLayoutsByDay[day].map((layout) => (
+                    <CalendarEventBlock
+                      key={layout.event.id}
+                      event={layout.event}
+                      top={layout.position.top}
+                      height={layout.position.height}
+                      column={layout.column}
+                      totalColumns={layout.totalColumns}
+                    />
+                  ))}
                 </div>
               </div>
             </div>

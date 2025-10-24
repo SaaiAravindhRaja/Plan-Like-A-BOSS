@@ -4,18 +4,31 @@
  */
 
 import { motion } from 'framer-motion';
-import { MapPin, User, AlertCircle } from 'lucide-react';
+import { MapPin, User, AlertCircle, X } from 'lucide-react';
 import { CalendarEvent } from '@/types';
 import { formatTimeDisplay } from '@/utils/timeUtils';
+import { useStore } from '@/store/useStore';
 
 interface CalendarEventBlockProps {
   event: CalendarEvent;
   top: number; // Percentage
   height: number; // Percentage
+  column?: number; // Column index for side-by-side layout
+  totalColumns?: number; // Total columns in the overlap group
 }
 
-export function CalendarEventBlock({ event, top, height }: CalendarEventBlockProps) {
+export function CalendarEventBlock({ event, top, height, column = 0, totalColumns = 1 }: CalendarEventBlockProps) {
   const isSmall = height < 8; // Less than ~1 hour
+  const toggleSectionSelection = useStore((state) => state.toggleSectionSelection);
+
+  // Calculate width and left offset for side-by-side layout
+  const widthPercent = 100 / totalColumns;
+  const leftPercent = (column * 100) / totalColumns;
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleSectionSelection(event.courseId, event.id);
+  };
 
   return (
     <motion.div
@@ -30,7 +43,7 @@ export function CalendarEventBlock({ event, top, height }: CalendarEventBlockPro
         backgroundColor: { duration: 0.5 },
       }}
       className={`
-        absolute left-1 right-1 rounded-lg
+        absolute rounded-lg
         overflow-hidden shadow-lg
         pointer-events-auto cursor-pointer
         border-2
@@ -41,17 +54,32 @@ export function CalendarEventBlock({ event, top, height }: CalendarEventBlockPro
       style={{
         top: `${top}%`,
         height: `${height}%`,
+        left: `${leftPercent}%`,
+        width: `${widthPercent}%`,
+        paddingLeft: column > 0 ? '2px' : '4px',
+        paddingRight: column < totalColumns - 1 ? '2px' : '4px',
       }}
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: 1.02, zIndex: 10 }}
     >
-      <div className="relative h-full p-2 text-white">
+      <div className="relative h-full p-2 text-white group">
+        {/* Remove button - visible on hover */}
+        <motion.button
+          onClick={handleRemove}
+          className="absolute top-1 right-1 z-10 bg-red-500 hover:bg-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          title="Remove from schedule"
+        >
+          <X className="w-3 h-3" />
+        </motion.button>
+
         {/* Conflict indicator */}
         {event.hasConflict && (
           <motion.div
             initial={{ rotate: 0 }}
             animate={{ rotate: [0, -10, 10, -10, 0] }}
             transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
-            className="absolute top-1 right-1"
+            className="absolute top-1 right-7 group-hover:opacity-0 transition-opacity"
           >
             <AlertCircle className="w-4 h-4" />
           </motion.div>
